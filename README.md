@@ -7,8 +7,9 @@
 ## ✨ 功能特性
 
 - 🗓️ 选择出生日期，生成专属结果
-- 🌌 星图卡片：黄道星座、月相、行星位置、可见星座与动态星空
+- 🌌 星图卡片：黄道星座、月相、行星位置、可见星座，并根据日期所属季节展示对应的四季星图（春/夏/秋/冬）
 - 🏺 文物卡片：与日期相关的出土文物图片与图文介绍
+- 🎵 背景音乐播放器：首页顶部与结果卡片页各配备播放器，支持播放/暂停、进度拖动、静音
 - 🖼️ 一键导出为图片，图片底部包含站点二维码与网址，方便扫码分享
 - 🚀 通过 GitHub Actions 自动部署到 GitHub Pages
 
@@ -46,10 +47,16 @@ npm run preview  # 预览生产构建
 
 ```
 src/
-├── components/      # DatePicker / StarChartCard / ArtifactCard / ExportButton / ShareFooter
-├── data/            # astronomy.ts（星图数据）/ artifacts.ts（文物数据）
+├── components/      # DatePicker / StarChartCard / ArtifactCard / MusicPlayer / ExportButton / ShareFooter
+├── data/            # astronomy.ts（星图与季节数据）/ artifacts.ts（文物数据）
+├── assets/
+│   ├── starcharts/  # 四季星图 spring/summer/autumn/winter.jpg
+│   └── artifacts/   # 文物图片
 ├── pages/Home.tsx   # 主页面
 └── App.tsx          # 路由入口
+
+public/
+└── music/           # 背景音乐 home.mp3（首页）/ card.mp3（结果页）
 ```
 
 ## 📝 待办事项
