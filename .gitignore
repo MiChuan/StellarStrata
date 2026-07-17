@@ -12,8 +12,9 @@ dist
 dist-ssr
 *.local
 
-# 原始素材目录（图片/音频等），不参与构建；应用使用的资源已复制至 public/ 与 src/assets/
-data/
+# 仅忽略仓库根目录下的原始素材目录（图片/音频等），不影响 src/data/
+# 前导斜杠表示从仓库根锚定，避免误伤任意层级名为 data 的目录
+/data/
 
 # Editor directories and files
 .vscode/*
