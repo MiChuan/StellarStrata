@@ -38,6 +38,9 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # 自动启用仓库的 GitHub Pages（免去手动在 Settings 中开启）
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
