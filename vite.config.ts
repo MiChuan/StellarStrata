@@ -4,7 +4,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ command }) => ({
   // GitHub Pages 部署在 /StellarStrata/ 子路径下，生产构建时启用该 base
-  base: command === 'build' ? '/StellarStrata/' : '/',
+  // Cloudflare Pages is served from the domain root. GitHub Pages supplies its
+  // repository subpath through VITE_BASE_PATH in the deployment workflow.
+  base: command === 'build' ? (process.env.VITE_BASE_PATH || '/') : '/',
   server: {
     host: '0.0.0.0',
     port: 5173,
