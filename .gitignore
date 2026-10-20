@@ -16,6 +16,9 @@ dist-ssr
 # 前导斜杠表示从仓库根锚定，避免误伤任意层级名为 data 的目录
 /data/
 
+# 本地工作区数据（会话记录、记忆等），不属于项目源码
+.workbuddy/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
