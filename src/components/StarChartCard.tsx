@@ -21,7 +21,7 @@ export default function StarChartCard({ data }: StarChartCardProps) {
   const chartImage = seasonCharts[data.season];
 
   return (
-    <div className="relative">
+    <div className="relative transition-transform duration-500 ease-out hover:-translate-y-1">
       <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-blue-900/40 rounded-2xl blur-xl opacity-40" />
       <div className="relative bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-purple-500/30 shadow-2xl overflow-hidden">
 
@@ -39,14 +39,14 @@ export default function StarChartCard({ data }: StarChartCardProps) {
               target="_blank"
               rel="noreferrer"
               title="查看大图"
-              className="block cursor-zoom-in"
+              className="block cursor-zoom-in group"
             >
               <img
                 src={chartImage}
                 alt={`${data.seasonLabel}季北半球星图`}
                 width={1600}
                 height={2262}
-                className="w-full h-auto block"
+                className="w-full h-auto block transition-transform duration-700 ease-out group-hover:scale-105"
                 decoding="async"
               />
             </a>

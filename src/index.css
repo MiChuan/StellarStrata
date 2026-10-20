@@ -78,10 +78,50 @@ body {
   animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 卡片依次浮现：用 backwards 填充在延迟期应用起始帧，
+   动画结束后回到自然 opacity:1 —— html2canvas 冻结动画时也不会丢内容 */
+.animate-fade-up-stagger {
+  animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* 标题字形的微光呼吸 */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.45));
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3.5s ease-in-out infinite;
+}
+
+/* 缓慢漂浮，用于星图海报的轻微悬停感 */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-y {
+  animation: float-y 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
-  .animate-fade-up-slow {
+  .animate-fade-up-slow,
+  .animate-fade-up-stagger,
+  .animate-glow-pulse,
+  .animate-float-y {
     animation: none !important;
+    opacity: 1 !important;
   }
 }
 

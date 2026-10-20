@@ -9,15 +9,17 @@
 
 ## ✨ 功能特性
 
+- 🌠 **WebGPU 动态星空**：由 [shaders.com](https://shaders.com) 的开源组件库 [`shaders`](https://github.com/shader-effects-inc/shaders) 驱动 —— 深空星云缓慢流动、星尘上浮闪烁、顶部极光摆动、暗角与胶片颗粒压住氛围；卡片外圈是沿圆角边框流动的光斑描边（星图卡紫青、文物卡琥珀玫红）
 - 🗓️ **日期选择**：年 / 月 / 日下拉 + 日历，支持手动输入后回车直达；年份列表跟随当前年份，上限为今天
 - 🌌 **星图卡片**
-  - 按季节展示春 / 夏 / 秋 / 冬四季北半球星图海报（可点击查看大图）
+  - 按季节展示春 / 夏 / 秋 / 冬四季北半球星图海报（可点击查看大图，悬停缓慢放大）
   - 黄道十二宫、月相（含 SVG 月相图标与亮面百分比）
   - 七颗行星的所在星座与度数，并标注是否逆行
   - 当晚可见星座，按季节给出，同一日期结果稳定不跳变
 - 🏺 **文物卡片**：优先匹配「同一天出土」的文物，没有则给出出土日期最接近的两件，并标明匹配方式
+- 🎬 **动效**：结果卡片依次错落浮现、悬停上浮、海报/文物图缩放呼吸、标题微光脉动；尊重 `prefers-reduced-motion`
 - 🎵 **背景音乐**：首页与结果页各一个播放器，支持播放 / 暂停、进度拖动、静音、加载失败提示
-- 🖼️ **一键导出**：导出前等待图片解码完成，图片底部带站点二维码与网址，方便扫码传播
+- 🖼️ **一键导出**：导出前等待图片解码完成并冻结入场动画，图片底部带站点二维码与网址，方便扫码传播
 - 📱 **响应式**：桌面双栏、移动端单栏，无横向滚动
 - 🚀 **自动部署**：GitHub Actions 构建并发布到 GitHub Pages
 
@@ -25,6 +27,7 @@
 
 - React 18 + TypeScript + Vite 6
 - Tailwind CSS 3
+- [`shaders`](https://github.com/shader-effects-inc/shaders)（WebGPU 星云 / 星尘 / 极光 / 光边组件，按需异步加载；不支持 WebGPU 的浏览器自动降级为 CSS 星点背景，功能不受影响）
 - react-datepicker（日期选择）
 - html2canvas（导出图片，按需加载）+ qrcode（二维码，按需加载）
 - lucide-react（图标）
@@ -85,6 +88,8 @@ npm run build                                  # 域根部署（默认 '/'）
 ```
 src/
 ├── components/
+│   ├── StarryBackground.tsx # WebGPU 动态星空背景（星云/星尘/极光/暗角/颗粒）+ CSS 兜底
+│   ├── GlowBorder.tsx       # WebGPU LightEdge 发光描边容器（测尺寸→圆角矩形 SDF）
 │   ├── DatePicker.tsx      # 日期选择面板
 │   ├── StarChartCard.tsx   # 星图卡片（海报 + 天象数据）
 │   ├── MoonPhaseIcon.tsx   # SVG 月相图标
@@ -98,7 +103,7 @@ src/
 ├── assets/
 │   ├── starcharts/         # 四季星图 spring/summer/autumn/winter.webp
 │   └── artifacts/          # 文物图片 1~12.jpg（随构建打包）
-├── pages/Home.tsx          # 主页面与结果区布局
+├── pages/Home.tsx          # 主页面与结果区布局（shader 组件 lazy 加载）
 ├── App.tsx                 # 路由（支持子路径 basename）
 └── index.css               # 全局深色主题、动画与日期组件样式
 public/
@@ -106,6 +111,20 @@ public/
 ```
 
 ## 🗒️ 更新日志
+
+### v1.1.0
+
+**新增**
+
+- 接入 [`shaders`](https://github.com/shader-effects-inc/shaders)（shaders.com 开源 WebGPU 组件库，MIT）：
+  - 全屏动态星空背景：双层 `Nebula` 星云 + `FloatingParticles` 星尘 + `Aurora` 极光 + `Vignette` 暗角 + `FilmGrain` 颗粒
+  - 结果卡片外圈 `LightEdge` 发光描边，光斑沿圆角边框流动；用 ResizeObserver 把容器尺寸换算成圆角矩形 SDF，光边始终贴合卡片
+  - 组件库整体 lazy 加载（独立 chunk），WebGPU 不可用时自动降级为 CSS 星点，页面功能不受影响
+- 页面动效：结果卡片错落浮现、悬停上浮、星图海报 / 文物图悬停缩放、标题微光呼吸；尊重 `prefers-reduced-motion`
+
+**修复**
+
+- 导出 PNG 内容空白：入场动画的 `forwards` 填充在导出冻结动画后把卡片透明度锁回 0，改用 `backwards` 填充修复
 
 ### v1.0.0
 

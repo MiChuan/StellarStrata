@@ -30,7 +30,7 @@ export default function CustomDatePicker({ onDateSelect }: DatePickerProps) {
   return (
     <div className="flex flex-col items-center gap-6 w-full">
       <div className="text-center animate-fade-up">
-        <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-amber-400 mb-4">
+        <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-amber-400 mb-4 animate-glow-pulse">
           StellarStrata
         </h1>
         <p className="text-slate-300 text-base sm:text-lg">探索你生日那天的星空与历史</p>

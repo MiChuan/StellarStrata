@@ -14,7 +14,7 @@ export default function ArtifactCard({ artifact, exact = false, eager = false }:
   const [failed, setFailed] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative transition-transform duration-500 ease-out hover:-translate-y-1">
       <div className="absolute inset-0 bg-gradient-to-r from-amber-900/30 via-orange-900/25 to-yellow-900/20 rounded-2xl blur-xl opacity-30" />
       <div className="relative bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-amber-500/25 shadow-2xl overflow-hidden">
 
@@ -33,7 +33,7 @@ export default function ArtifactCard({ artifact, exact = false, eager = false }:
               loading={eager ? "eager" : "lazy"}
               decoding="async"
               onError={() => setFailed(true)}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-transparent pointer-events-none" />

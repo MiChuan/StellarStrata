@@ -1,7 +1,7 @@
 {
   "name": "stellarstrata",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "输入生日，生成那一天的星图与出土文物卡片，可导出为带二维码的图片分享",
   "license": "MIT",
   "type": "module",
@@ -24,7 +24,8 @@
     "react": "^18.3.1",
     "react-datepicker": "^9.1.0",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "shaders": "^4.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

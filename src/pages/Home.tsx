@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import CustomDatePicker from "../components/DatePicker";
 import StarChartCard from "../components/StarChartCard";
 import ArtifactCard from "../components/ArtifactCard";
@@ -9,24 +9,11 @@ import { generateStarChart, StarChart } from "../data/astronomy";
 import { getArtifactsForDate, ArtifactMatch } from "../data/artifacts";
 import { ArrowLeft, Landmark, Sparkles } from "lucide-react";
 
-const BASE = import.meta.env.BASE_URL;
+// WebGPU 组件库体积较大，按需异步加载，避免拖慢首屏
+const StarryBackground = lazy(() => import("../components/StarryBackground"));
+const GlowBorder = lazy(() => import("../components/GlowBorder"));
 
-/**
- * 星空背景在模块加载时算一次即可。
- * 之前写在 JSX 里用 Math.random()，每次重渲染星星都会重新排布，页面会「跳」。
- */
-const STARS = Array.from({ length: 70 }, (_, i) => {
-  const seed = (i * 9301 + 49297) % 233280;
-  const roll = (offset: number) => ((seed * (offset + 7)) % 1000) / 1000;
-  return {
-    id: i,
-    left: roll(1) * 100,
-    top: roll(2) * 100,
-    opacity: 0.25 + roll(3) * 0.6,
-    size: roll(4) > 0.88 ? 2 : 1,
-    delay: roll(5) * 4,
-  };
-});
+const BASE = import.meta.env.BASE_URL;
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -52,31 +39,11 @@ export default function Home() {
   const allExact = artifacts.length > 0 && artifacts.every((item) => item.exact);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 relative overflow-hidden">
-      {/* 背景星点 */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {STARS.map((star) => (
-          <span
-            key={star.id}
-            className="absolute rounded-full bg-white animate-pulse"
-            style={{
-              left: `${star.left}%`,
-              top: `${star.top}%`,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              opacity: star.opacity,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* 星云光晕 */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/4 left-1/6 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-[#05070f] relative overflow-hidden">
+      {/* WebGPU 动态星空背景（星云 + 星尘 + 极光），不支持时降级为 CSS 星点 */}
+      <Suspense fallback={null}>
+        <StarryBackground />
+      </Suspense>
 
       <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12">
         {!selectedDate && (
@@ -111,7 +78,13 @@ export default function Home() {
               ref={cardsRef}
               className="w-full max-w-6xl bg-slate-950/80 p-3 sm:p-4 rounded-2xl border border-slate-800/80"
             >
-              <StarChartCard data={starChart} />
+              <div className="animate-fade-up-stagger" style={{ animationDelay: "0.05s" }}>
+                <Suspense fallback={<StarChartCard data={starChart} />}>
+                  <GlowBorder colorA="#8b5cf6" colorB="#22d3ee" intensity={0.5}>
+                    <StarChartCard data={starChart} />
+                  </GlowBorder>
+                </Suspense>
+              </div>
 
               <div className="mt-4 sm:mt-5">
                 <div className="flex items-center gap-2 px-1 mb-3">
@@ -123,12 +96,21 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {artifacts.map((match, index) => (
-                    <ArtifactCard
+                    <div
                       key={match.artifact.id}
-                      artifact={match.artifact}
-                      exact={match.exact}
-                      eager={index === 0}
-                    />
+                      className="animate-fade-up-stagger"
+                      style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+                    >
+                      <Suspense fallback={<ArtifactCard artifact={match.artifact} exact={match.exact} eager={index === 0} />}>
+                        <GlowBorder colorA="#f59e0b" colorB="#fb7185" intensity={0.45}>
+                          <ArtifactCard
+                            artifact={match.artifact}
+                            exact={match.exact}
+                            eager={index === 0}
+                          />
+                        </GlowBorder>
+                      </Suspense>
+                    </div>
                   ))}
                 </div>
               </div>
