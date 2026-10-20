@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  color-scheme: dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,30 +15,99 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * 深色底必须由 html/body 本身提供：
+ * 页面主背景是带透明度的渐变，若画布是纯白，整页会被冲淡成灰紫色。
+ */
+html,
+body {
+  background-color: #05070f;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  color: #e2e8f0;
 }
 
-.font-display {
-  font-family: 'Playfair Display', serif;
+::selection {
+  background-color: rgba(168, 85, 247, 0.35);
+  color: #fff;
+}
+
+/* 全局滚动条，避免默认白条打断深色氛围 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* 入场动画：替代原先 1s 的假加载等待 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-up-slow {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-up-slow {
+    animation: none !important;
+  }
+}
+
+/* react-datepicker 深色主题 */
+.react-datepicker-wrapper {
+  width: 100%;
 }
 
 .react-datepicker {
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   background-color: #1e293b;
-  border: 1px solid #4c1d95;
+  border: 1px solid rgba(139, 92, 246, 0.4);
   border-radius: 0.75rem;
   color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
 .react-datepicker__header {
   background-color: #312e81;
-  border-bottom: 1px solid #4c1d95;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.4);
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
 }
 
-.react-datepicker__current-month {
+.react-datepicker__current-month,
+.react-datepicker-time__header {
   color: white;
   font-weight: 600;
 }
@@ -58,6 +127,7 @@ body {
 
 .react-datepicker__day--selected {
   background-color: #8b5cf6;
+  color: #fff;
 }
 
 .react-datepicker__day--keyboard-selected {
@@ -65,8 +135,12 @@ body {
 }
 
 .react-datepicker__day--today {
-  font-weight: bold;
+  font-weight: 700;
   color: #fbbf24;
+}
+
+.react-datepicker__day--disabled {
+  color: #475569;
 }
 
 .react-datepicker__navigation {
@@ -93,4 +167,8 @@ body {
 .react-datepicker__month-select option,
 .react-datepicker__year-select option {
   background-color: #1e293b;
+}
+
+.react-datepicker-popper {
+  z-index: 50;
 }

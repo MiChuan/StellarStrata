@@ -1,130 +1,146 @@
-import React, { useState, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import CustomDatePicker from "../components/DatePicker";
 import StarChartCard from "../components/StarChartCard";
 import ArtifactCard from "../components/ArtifactCard";
 import ExportButton from "../components/ExportButton";
 import ShareFooter from "../components/ShareFooter";
 import MusicPlayer from "../components/MusicPlayer";
-import { generateStarChart } from "../data/astronomy";
-import { getArtifactsByDate, getRandomArtifacts, Artifact } from "../data/artifacts";
-import { StarChart } from "../data/astronomy";
-import { Sparkles } from "lucide-react";
+import { generateStarChart, StarChart } from "../data/astronomy";
+import { getArtifactsForDate, ArtifactMatch } from "../data/artifacts";
+import { ArrowLeft, Landmark, Sparkles } from "lucide-react";
+
+const BASE = import.meta.env.BASE_URL;
+
+/**
+ * 星空背景在模块加载时算一次即可。
+ * 之前写在 JSX 里用 Math.random()，每次重渲染星星都会重新排布，页面会「跳」。
+ */
+const STARS = Array.from({ length: 70 }, (_, i) => {
+  const seed = (i * 9301 + 49297) % 233280;
+  const roll = (offset: number) => ((seed * (offset + 7)) % 1000) / 1000;
+  return {
+    id: i,
+    left: roll(1) * 100,
+    top: roll(2) * 100,
+    opacity: 0.25 + roll(3) * 0.6,
+    size: roll(4) > 0.88 ? 2 : 1,
+    delay: roll(5) * 4,
+  };
+});
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [starChart, setStarChart] = useState<StarChart | null>(null);
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [artifacts, setArtifacts] = useState<ArtifactMatch[]>([]);
   const cardsRef = useRef<HTMLDivElement>(null);
+
+  const starChart: StarChart | null = useMemo(
+    () => (selectedDate ? generateStarChart(selectedDate) : null),
+    [selectedDate],
+  );
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const chart = generateStarChart(date);
-      setStarChart(chart);
-
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const foundArtifacts = getArtifactsByDate(month, day);
-      
-      if (foundArtifacts.length > 0) {
-        setArtifacts(foundArtifacts);
-      } else {
-        setArtifacts(getRandomArtifacts(2));
-      }
-
-      setIsLoading(false);
-    }, 1000);
+    setArtifacts(getArtifactsForDate(date, 2));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleReset = () => {
+    setSelectedDate(null);
+    setArtifacts([]);
+  };
+
+  const allExact = artifacts.length > 0 && artifacts.every((item) => item.exact);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 relative overflow-hidden">
-      <div className="absolute inset-0">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 relative overflow-hidden">
+      {/* 背景星点 */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {STARS.map((star) => (
+          <span
+            key={star.id}
+            className="absolute rounded-full bg-white animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              opacity: Math.random() * 0.5 + 0.2,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              opacity: star.opacity,
+              animationDelay: `${star.delay}s`,
             }}
           />
         ))}
       </div>
 
-      <div className="absolute top-0 left-0 w-full h-full">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/3 rounded-full blur-3xl" />
+      {/* 星云光晕 */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute top-1/4 left-1/6 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12">
         {!selectedDate && (
-          <>
-            <div className="flex justify-center mb-8">
-              <MusicPlayer src="/music/home.mp3" title="风雨草" />
-            </div>
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-6rem)]">
+            <MusicPlayer src={`${BASE}music/home.mp3`} title="风雨草" preload="none" />
+            <div className="flex-1 flex flex-col items-center justify-center w-full py-8 sm:py-10">
               <CustomDatePicker onDateSelect={handleDateSelect} />
             </div>
-          </>
+          </div>
         )}
 
-        {selectedDate && (
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-8">
+        {selectedDate && starChart && (
+          <div className="flex flex-col items-center animate-fade-up">
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
               <button
-                onClick={() => {
-                  setSelectedDate(null);
-                  setStarChart(null);
-                  setArtifacts([]);
-                }}
-                className="px-4 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-white hover:bg-slate-700/50 transition-colors"
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/70 border border-slate-600/80 rounded-lg text-slate-200 hover:bg-slate-700/70 hover:text-white transition-colors"
               >
-                返回选择日期
+                <ArrowLeft className="w-4 h-4" />
+                重新选择
               </button>
-              <div className="text-white text-lg">
-                <span className="text-purple-400">出生日期：</span>
-                {selectedDate.getFullYear()}年{selectedDate.getMonth() + 1}月{selectedDate.getDate()}日
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900/60 border border-purple-500/25 text-slate-200 text-sm sm:text-base">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span className="text-purple-300">出生日期</span>
+                <span className="text-white tabular-nums">{starChart.date}</span>
+              </div>
+              <MusicPlayer src={`${BASE}music/card.mp3`} title="快睡，天快亮" autoPlay />
+            </div>
+
+            <div
+              ref={cardsRef}
+              className="w-full max-w-6xl bg-slate-950/80 p-3 sm:p-4 rounded-2xl border border-slate-800/80"
+            >
+              <StarChartCard data={starChart} />
+
+              <div className="mt-4 sm:mt-5">
+                <div className="flex items-center gap-2 px-1 mb-3">
+                  <Landmark className="w-5 h-5 text-amber-400" />
+                  <h2 className="text-lg font-semibold text-white">出土文物</h2>
+                  <span className="ml-auto text-[11px] text-amber-300/80">
+                    {allExact ? "与你的生日同日出土" : "出土日期与你的生日最接近"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {artifacts.map((match, index) => (
+                    <ArtifactCard
+                      key={match.artifact.id}
+                      artifact={match.artifact}
+                      exact={match.exact}
+                      eager={index === 0}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 sm:mt-5">
+                <ShareFooter />
               </div>
             </div>
 
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Sparkles className="w-16 h-16 text-amber-400 animate-spin" />
-                <p className="mt-4 text-white text-lg">正在探索星图与历史...</p>
-              </div>
-            )}
-
-            {!isLoading && starChart && (
-              <div className="w-full max-w-6xl flex justify-center mb-6">
-                <MusicPlayer src="/music/card.mp3" title="快睡，天快亮" autoPlay />
-              </div>
-            )}
-
-            {!isLoading && starChart && (
-              <div ref={cardsRef} className="w-full max-w-6xl bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 p-4 rounded-2xl">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
-                  <StarChartCard data={starChart} />
-                  <div className="space-y-6">
-                    {artifacts.map((artifact) => (
-                      <ArtifactCard key={artifact.id} artifact={artifact} />
-                    ))}
-                  </div>
-                </div>
-                <ShareFooter />
-              </div>
-            )}
-
-            {!isLoading && starChart && (
-              <div className="flex items-center justify-center mt-8">
-                <ExportButton targetRef={cardsRef} />
-              </div>
-            )}
+            <div className="flex items-center justify-center mt-6">
+              <ExportButton targetRef={cardsRef} />
+            </div>
           </div>
         )}
       </div>

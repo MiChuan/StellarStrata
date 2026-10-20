@@ -1,33 +1,27 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ command }) => ({
-  // GitHub Pages 部署在 /StellarStrata/ 子路径下，生产构建时启用该 base
-  // Cloudflare Pages is served from the domain root. GitHub Pages supplies its
-  // repository subpath through VITE_BASE_PATH in the deployment workflow.
-  base: command === 'build' ? (process.env.VITE_BASE_PATH || '/') : '/',
+  // GitHub Pages 部署在 /StellarStrata/ 子路径下，由部署工作流通过 VITE_BASE_PATH 注入；
+  // Cloudflare Pages 等域根部署则回落到 '/'
+  base: command === "build" ? process.env.VITE_BASE_PATH || "/" : "/",
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 5173,
     strictPort: true,
-    watch: {
-      // data/ 仅存放素材（图片、音频等），不参与构建；
-      // 排除监听以避免大文件或下载中的临时文件导致 watcher 崩溃
-      ignored: ['**/data/**'],
-    },
   },
   build: {
-    sourcemap: 'hidden',
-  },
-  plugins: [
-    react({
-      babel: {
-        plugins: [
-          'react-dev-locator',
-        ],
+    // 不输出 sourcemap：减小部署体积，也避免源码随站点公开
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          datepicker: ["react-datepicker"],
+        },
       },
-    }),
-    tsconfigPaths()
-  ],
-}))
+    },
+  },
+  plugins: [react(), tsconfigPaths()],
+}));
